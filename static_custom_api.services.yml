@@ -1,0 +1,7 @@
+services:
+ static_custom_api.entity_cache:
+  class: Drupal\static_custom_api\Service\EntityCache
+  arguments: ["@static_custom_api.files_cache", "@serializer", "@entity_type.manager"]
+ static_custom_api.files_cache:
+  class: Drupal\static_custom_api\Service\FilesCache
+  arguments: ["@file_system", "@serializer"]

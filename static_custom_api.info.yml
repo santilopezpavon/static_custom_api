@@ -1,0 +1,8 @@
+type: module
+name: Static Custom Api
+description: 'Static Custom API.'
+package: API
+core_version_requirement: ^8.8 || ^9
+configure: static_custom_api.settings_form
+dependencies:
+  - serialization
