@@ -42,7 +42,6 @@ class ActionsForm extends FormBase {
   public function action1Submit(array &$form, FormStateInterface $form_state) {
     // Get the required services.
     $files_cache_service = \Drupal::service("static_custom_api.files_cache");
-    $entity_query_service = \Drupal::entityQuery('paragraph');
 
     // Get cacheable entity types.
     $entity_types_cacheable = $this->getCacheableEntityTypes($files_cache_service);
@@ -57,15 +56,15 @@ class ActionsForm extends FormBase {
       'finished' => '\Drupal\static_custom_api\Batch\BatchJsonOperations::importFinished',
     ];
 
-    // Get paragraph entities.
-    $paragraph_entities = $this->getParagraphEntities($entity_query_service);
-
     // Add batch operations for each paragraph entity.
     foreach ($entity_types_cacheable as $type_cacheable) {
-      foreach ($paragraph_entities as $value) {
+      $entity_query_service = \Drupal::entityQuery($type_cacheable);
+      $entities = $this->getParagraphEntities($entity_query_service);
+      foreach ($entities as $value) {
         $this->addBatchOperation($batch, $type_cacheable, $value);
       }
     }
+   
 
     // Start the batch process.
     batch_set($batch);

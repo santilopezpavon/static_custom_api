@@ -18,12 +18,5 @@
    * Implements hook_entity_delete().
    */
   function static_custom_api_entity_delete(\Drupal\Core\Entity\EntityInterface $entity) {
-    // Realiza acciones adicionales antes de que se elimine una entidad.
-    // Por ejemplo, puedes eliminar archivos relacionados con la entidad.
-   /* $target_type = $entity->getEntityTypeId();
-    $bundle = $entity->bundle();
-    $id = $entity->id();
-    \Drupal::logger("static_custom_api_entity_delete")->alert(print_r($target_type, true));;
-    \Drupal::logger("static_custom_api_entity_delete")->alert(print_r($bundle, true));;
-    \Drupal::logger("static_custom_api_entity_delete")->alert(print_r($id, true));*/
+    // TODO. Delete File.
   }

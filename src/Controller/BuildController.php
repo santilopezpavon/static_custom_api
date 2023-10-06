@@ -19,7 +19,7 @@ class BuildController extends ControllerBase {
    */
   public function mostrarFormulario() {
 
-
+    
     /* $entity_type = "node";
     $bundle = "article";
     dump(\Drupal::entityTypeManager()->getDefinitions());*/
