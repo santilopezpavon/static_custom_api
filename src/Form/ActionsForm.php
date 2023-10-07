@@ -53,19 +53,11 @@ class ActionsForm extends FormBase {
     $entity_types_cacheable = $this->getCacheableEntityTypes($files_cache_service);
 
     // Create a batch process.
-    $batch = [
-      'title' => $this->t('Importing JSONs...'),
-      'operations' => [],
-      'init_message' => $this->t('Starting...'),
-      'progress_message' => $this->t('Processed @current out of @total.'),
-      'error_message' => $this->t('An error occurred during processing.'),
-      'finished' => '\Drupal\static_custom_api\Batch\BatchJsonOperations::importFinished',
-    ];
+    $batch = $this->prepareBatchArray("Creating entities JSONs");
 
     // Add batch operations for each paragraph entity.
     foreach ($entity_types_cacheable as $type_cacheable) {
-      $entity_query_service = \Drupal::entityQuery($type_cacheable);
-      $entities = $this->getParagraphEntities($entity_query_service);
+      $entities = $this->getAllEntities($type_cacheable);
       foreach ($entities as $value) {
         $this->addBatchOperation($batch, $type_cacheable, $value);
       }
@@ -83,20 +75,14 @@ class ActionsForm extends FormBase {
     // Get cacheable entity types.
     $entity_types_cacheable = $this->getCacheableEntityTypes($files_cache_service);
     $languages_site =  \Drupal::languageManager()->getLanguages();
+
     // Create a batch process.
-    $batch = [
-      'title' => $this->t('Importing JSONs...'),
-      'operations' => [],
-      'init_message' => $this->t('Starting...'),
-      'progress_message' => $this->t('Processed @current out of @total.'),
-      'error_message' => $this->t('An error occurred during processing.'),
-      'finished' => '\Drupal\static_custom_api\Batch\BatchJsonOperations::importFinished',
-    ];
+    $batch = $this->prepareBatchArray("Creating alias JSONs");
+  
 
     // Add batch operations for each paragraph entity.
     foreach ($entity_types_cacheable as $type_cacheable) {
-      $entity_query_service = \Drupal::entityQuery($type_cacheable);
-      $entities = $this->getParagraphEntities($entity_query_service);
+      $entities = $this->getAllEntities($type_cacheable);
       foreach ($entities as $value) {
         foreach ($languages_site as $languages_code => $languages_value) {
           $this->addBatchOperationAlias($batch, $type_cacheable, $value, $languages_code);
@@ -107,6 +93,19 @@ class ActionsForm extends FormBase {
 
     // Start the batch process.
     batch_set($batch);
+  }
+
+
+  private function prepareBatchArray($title) {
+    return  [
+      'title' => $title . "...",
+      'operations' => [],
+      'init_message' => $this->t('Starting...'),
+      'progress_message' => $this->t('Processed @current out of @total.'),
+      'error_message' => $this->t('An error occurred during processing.'),
+      'finished' => '\Drupal\static_custom_api\Batch\BatchJsonOperations::importFinished',
+    ];
+
   }
 
 
@@ -127,7 +126,8 @@ class ActionsForm extends FormBase {
   /**
    * Helper function to get paragraph entities.
    */
-  private function getParagraphEntities($entity_query_service) {
+  private function getAllEntities($type_entity) {
+    $entity_query_service = \Drupal::entityQuery($type_entity);
     $results = $entity_query_service->execute();
     return $results;
   }
@@ -144,7 +144,7 @@ class ActionsForm extends FormBase {
    */
   private function addBatchOperation(&$batch, $type_cacheable, $value) {
     $batch['operations'][] = [
-      '\Drupal\static_custom_api\Batch\BatchJsonOperations::importLine',
+      '\Drupal\static_custom_api\Batch\BatchJsonOperations::generateEntityFiles',
       [$type_cacheable, $value],
     ];
   }

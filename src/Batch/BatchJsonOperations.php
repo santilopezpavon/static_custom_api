@@ -20,7 +20,7 @@ class BatchJsonOperations {
   /**
    * Process a single line.
    */
-  public static function importLine($type_content, $id_content, &$context) {
+  public static function generateEntityFiles($type_content, $id_content, &$context) {
     $files_cache_service = \Drupal::service("static_custom_api.files_cache");
 
     $storage = \Drupal::entityTypeManager()->getStorage($type_content);
