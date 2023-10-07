@@ -23,13 +23,25 @@ class AliasCache {
         $this->filesCache = \Drupal::service('static_custom_api.files_cache');
     } 
 
+
+    public function saveAliasByEntity($entity) {
+        if (!$this->filesCache->isEntityTypeJsonAble($entity->getEntityTypeId())) {
+            return FALSE;
+        } 
+        $entity_data_for_json = $this->filesCache->getEntityDataForSaveJson($entity);
+        $this->saveAlias($entity_data_for_json["target_type"], $entity_data_for_json["id"],$entity_data_for_json["lang"]);
+    }
+
     public function saveAlias($entity_type, $id_entity, $lang) {
         $origin_url = $this->getOriginUrl($entity_type, $id_entity);
         $alias = $this->getAliasFromOriginUrl($origin_url, $lang);
+        \Drupal::logger("saveAlias originurl")->alert(print_r($origin_url, true));
+        \Drupal::logger("saveAlias alias")->alert(print_r($alias, true));
+
         if($alias === NULL) {
             return NULL;
         }
-        $url = Url::fromUri('internal:' . $origin_url);
+        //$url = Url::fromUri('internal:' . $origin_url);
        
 
         $directory = $this->base_folder_files . "/" . $lang . "" . $alias;
@@ -83,5 +95,26 @@ class AliasCache {
 
         }
         return NULL;
+    }
+
+    public function removeAlias($entity) {
+        if (!$this->filesCache->isEntityTypeJsonAble($entity->getEntityTypeId())) {
+            return FALSE;
+        } 
+        $entity_data_for_json = $this->filesCache->getEntityDataForSaveJson($entity);
+        
+        $origin_url = $this->getOriginUrl($entity_data_for_json["target_type"], $entity_data_for_json["id"]);
+        $alias = $this->getAliasFromOriginUrl($origin_url, $entity_data_for_json["lang"]);
+
+        if($alias === NULL) {
+            return NULL;
+        }      
+
+        $path_file_real = $this->fileSystem->realpath($this->base_folder_files . "/" . $entity_data_for_json["lang"] . $alias . "/data.json");
+
+        if (file_exists($path_file_real)) {
+            $this->fileSystem->delete($path_file_real);
+        } 
+       
     }
 }

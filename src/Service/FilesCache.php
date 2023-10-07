@@ -50,6 +50,21 @@ class FilesCache {
         } 
     }   
 
+    public function removeEntity($entity) {
+        if (!$this->isEntityTypeJsonAble($entity->getEntityTypeId())) {
+            return FALSE;
+        }   
+
+        $entity_data_for_json = $this->getEntityDataForSaveJson($entity);
+
+        $path_file = $this->getPathFile($entity_data_for_json);
+        $path_file_real = $path_file["real_path_file"];
+        
+        if (file_exists($path_file_real)) {
+            $this->fileSystem->delete($path_file_real);
+        } 
+    }
+
     /**
      * Saves an entity in JSON format.
      *
@@ -202,7 +217,7 @@ class FilesCache {
      * @return array
      *   An array of entity data.
      */
-    private function getEntityDataForSaveJson($entity) {
+    public function getEntityDataForSaveJson($entity) {
         return [
             "target_type" => $entity->getEntityTypeId(),
             "bundle" => $entity->bundle(),
