@@ -161,8 +161,20 @@ class FilesCache {
         $json_entity["type_legacy"] = [
             "bundle" => $entity->bundle(),
             "type" => $entity->getEntityTypeId(),
-            "id" => $entity->id()
+            "id" => $entity->id(),
+            "lang" => $entity->language()->getId()
         ];
+        try {
+
+            $origin = "/" . $json_entity["type_legacy"]["type"] . "/" . $json_entity["type_legacy"]["id"];
+            $alias = \Drupal::service('path_alias.manager')->getAliasByPath($origin, $json_entity["type_legacy"]["lang"]);
+
+            $json_entity["alias_legacy"] = $alias;
+    
+        } catch (\Throwable $th) {
+            //throw $th;
+        }
+
 
         $json_entity = json_encode($json_entity);
         $this->fileSystem->saveData($json_entity, $file_path, FileSystemInterface::EXISTS_REPLACE); 

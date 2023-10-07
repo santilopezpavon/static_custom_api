@@ -24,26 +24,17 @@ class AliasCache {
     } 
 
 
-    public function saveAliasByEntity($entity) {
+    /*public function saveAliasByEntity($entity) {
         if (!$this->filesCache->isEntityTypeJsonAble($entity->getEntityTypeId())) {
             return FALSE;
         } 
         $entity_data_for_json = $this->filesCache->getEntityDataForSaveJson($entity);
         try {
-            $alias = $entity->get("path")->getValue()[0]["alias"];
-
-            \Drupal::logger("saveAliasByEntity")->alert(print_r($alias, true));
-            \Drupal::logger("saveAliasByEntity")->alert(print_r($entity->get("path")->getValue(), true));
-
-            \Drupal::logger("saveAliasByEntity")->alert(print_r($entity_data_for_json, true));
-            $this->saveAlias($entity_data_for_json["target_type"], $entity_data_for_json["id"],$entity_data_for_json["lang"], $alias);
-
-
-
+            $this->saveAlias($entity_data_for_json["target_type"], $entity_data_for_json["id"],$entity_data_for_json["lang"]);
         } catch (\Throwable $th) {
             //throw $th;
         }
-    }
+    }*/
 
     public function saveAlias($entity_type, $id_entity, $lang, $current_alias = NULL) {
         $origin_url = $this->getOriginUrl($entity_type, $id_entity);
@@ -112,7 +103,18 @@ class AliasCache {
         return NULL;
     }
 
-    public function removeAlias($entity) {
+    public function removeAliasByAlias($alias, $lang) {
+        $path_file_real = $this->fileSystem->realpath($this->base_folder_files . "/" . $lang . $alias);
+        if(file_exists($path_file_real)) {
+            $this->fileSystem->deleteRecursive($path_file_real);
+        }
+    }
+
+    public function createAliasByAlias() {
+        
+    }
+
+    public function removeAliasByEntity($entity) {
         if (!$this->filesCache->isEntityTypeJsonAble($entity->getEntityTypeId())) {
             return FALSE;
         } 

@@ -35,6 +35,8 @@ class EntityCache {
      */
     protected $entityManager;
 
+    protected $aliasCache;
+
     /**
      * Constructs an EntityCache object.
      *
@@ -45,10 +47,11 @@ class EntityCache {
      * @param \Drupal\Core\Entity\EntityTypeManager $entityManager
      *   The EntityTypeManager service.
      */
-    public function __construct(FilesCache $filesCache, Serializer $serializer, EntityTypeManager $entityManager) {
+    public function __construct(FilesCache $filesCache, Serializer $serializer, EntityTypeManager $entityManager, $aliasCache) {
         $this->filesCache = $filesCache;
         $this->serializer = $serializer;
         $this->entityManager = $entityManager;
+        $this->aliasCache = $aliasCache;
     } 
 
     /**
@@ -104,20 +107,165 @@ class EntityCache {
      * @return array|false
      *   The entity data as an array or FALSE if not found.
      */
-    public function getEntityFromJSON($entity_type, $id, $lang) {
+    public function getEntityFromJSON($entity_type, $id, $lang, $recursive = FALSE) {
         $entity = $this->filesCache->getEntityFile($entity_type, $id, $lang);
 
-        foreach ($entity as $field_name => &$value_field) {            
-            foreach ($value_field as &$value) {
-                if (
-                    is_array($value) && 
-                    array_key_exists("target_type", $value) && 
-                    $this->filesCache->isEntityTypeJsonAble($value["target_type"])
-                ) {
-                   $value["entity"] = $this->getEntityFromJSON($value["target_type"], $value["target_id"], $lang);
+        if($recursive === TRUE) {
+            foreach ($entity as $field_name => &$value_field) {            
+                foreach ($value_field as &$value) {
+                    if (
+                        is_array($value) && 
+                        array_key_exists("target_type", $value) && 
+                        $this->filesCache->isEntityTypeJsonAble($value["target_type"])
+                    ) {
+                       $value["entity"] = $this->getEntityFromJSON($value["target_type"], $value["target_id"], $lang, $recursive);
+                    }
                 }
             }
         }
+       
         return $entity;
+    }
+
+
+    public function createEntityCache($entity) {
+
+    }
+
+    public function deleteEntityCache($entity) {
+        $this->deleteAlias($entity);
+        if (!$this->filesCache->isEntityTypeJsonAble($entity->getEntityTypeId())) {
+            return FALSE;
+        } 
+      /*  try {
+            $data_entity = $this->filesCache->getEntityDataForSaveJson($entity);
+            $data_entity_json = $this->filesCache->getEntityFile(
+                $data_entity["target_type"], 
+                $data_entity["id"], 
+                $data_entity["lang"]
+            );
+            $entity_serialized = $this->filesCache->getEntityFile($data_entity["target_type"], $data_entity["id"], $data_entity["lang"]);
+
+            $anterior_alias = $entity_serialized["alias_legacy"];
+         
+            // Borrar alias
+            $this->aliasCache->removeAliasByAlias($anterior_alias, $data_entity["lang"]);
+        } catch (\Throwable $th) {
+            //throw $th;
+        }*/
+        $this->filesCache->removeEntity($entity);
+
+        
+    }
+
+    public function updateEntityCache($entity) {
+        $this->updateAlias($entity);
+        if (!$this->filesCache->isEntityTypeJsonAble($entity->getEntityTypeId())) {
+            return FALSE;
+        }  
+        /*
+        try {
+            $data_entity = $this->filesCache->getEntityDataForSaveJson($entity);
+            $data_entity_json = $this->filesCache->getEntityFile(
+                $data_entity["target_type"], 
+                $data_entity["id"], 
+                $data_entity["lang"]
+            );
+            $entity_serialized = $this->filesCache->getEntityFile($data_entity["target_type"], $data_entity["id"], $data_entity["lang"]);
+
+            
+            if($entity_serialized === FALSE) { // Crear
+                $this->aliasCache->saveAliasByEntity($entity);
+            } else { // Actualizar
+                $anterior_alias = $entity_serialized["alias_legacy"];           
+                // Borrar alias
+                $this->aliasCache->removeAliasByAlias($anterior_alias, $data_entity["lang"]);
+                // Generar nuevo alias
+                $this->aliasCache->saveAliasByEntity($entity);            
+            }
+            } catch (\Throwable $th) {
+                //throw $th;
+            }
+        
+*/
+
+        $this->filesCache->saveEntity($entity);
+    }
+
+    public function deleteAlias($entity) {
+        $info_alias = $this->getInfoAliasEntity($entity);
+        if(empty($info_alias)) {
+            return NULL;
+        }
+
+        $this->aliasCache->removeAliasByAlias($info_alias["alias"], $info_alias["lang"]);
+        
+        $storage = $this->entityManager->getStorage($info_alias["target_type"]);
+        $entity_db = $storage->load($info_alias["target_id"]);
+        if(!empty($entity_db) && method_exists($entity_db, "hasTranslation") && $entity_db->hasTranslation($info_alias["lang"])) {
+            $entity_db = $entity_db->getTranslation($info_alias["lang"]);
+            $this->filesCache->removeEntity($entity_db);
+        }
+        
+    }
+
+    public function updateAlias($entity) {
+        $info_alias = $this->getInfoAliasEntity($entity);
+        if(empty($info_alias)) {
+            return NULL;
+        }
+
+        $entity_serialized = $this->filesCache->getEntityFile($info_alias["target_type"], $info_alias["target_id"], $info_alias["lang"]);
+        $anterior_alias = $entity_serialized["alias_legacy"];  
+
+        if($anterior_alias != $info_alias["alias"]) { // Update
+            $this->aliasCache->removeAliasByAlias($anterior_alias, $info_alias["lang"]);
+
+            $this->aliasCache->saveAlias(
+                $info_alias["target_type"], 
+                $info_alias["target_id"],
+                $info_alias["lang"],
+                $info_alias["alias"]
+            ); 
+
+            $storage = $this->entityManager->getStorage($info_alias["target_type"]);
+            $entity_db = $storage->load($info_alias["target_id"]);
+            if(method_exists($entity_db, "hasTranslation") && $entity_db->hasTranslation($info_alias["lang"])) {
+                $entity_db = $entity_db->getTranslation($info_alias["lang"]);
+            }
+            $this->filesCache->saveEntity($entity_db);
+
+            
+        } else { // Create
+            $this->aliasCache->saveAlias(
+                $info_alias["target_type"], 
+                $info_alias["target_id"],
+                $info_alias["lang"],
+                $info_alias["alias"]
+            ); 
+        }
+
+
+        // removeAliasByAlias($alias, $lang)
+    }
+
+    public function getInfoAliasEntity($entity) {
+        if($entity->getEntityTypeId() !== 'path_alias') {
+            return NULL;
+        }
+
+        $alias = $entity->getAlias();
+        $source_path = $entity->getPath();
+
+        $array_explode = explode("/", $source_path);
+
+        return [
+            "alias" => $alias,
+            "source_path" => $source_path,
+            "lang" => $entity->language()->getId(),
+            "target_type" => $array_explode[1],
+            "target_id" => $array_explode[2]
+        ];
+
     }
 }
