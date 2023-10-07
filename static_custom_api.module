@@ -5,7 +5,7 @@
    */
   function static_custom_api_entity_insert(\Drupal\Core\Entity\EntityInterface $entity) {
       \Drupal::service("static_custom_api.files_cache")->saveEntity($entity);
-      \Drupal::service("static_custom_api.alias_cache")->saveAliasByEntity($entity);
+      //\Drupal::service("static_custom_api.alias_cache")->saveAliasByEntity($entity);
 
   }
   
@@ -15,10 +15,21 @@
   function static_custom_api_entity_update(\Drupal\Core\Entity\EntityInterface $entity) {
     \Drupal::service("static_custom_api.files_cache")->saveEntity($entity);
     \Drupal::service("static_custom_api.alias_cache")->saveAliasByEntity($entity);
-
-
   }
   
+  function static_custom_api_entity_translation_insert(\Drupal\Core\Entity\EntityInterface $translation) {
+    \Drupal::service("static_custom_api.alias_cache")->saveAliasByEntity($translation);
+  }
+
+  function static_custom_api_entity_translation_update(\Drupal\Core\Entity\EntityInterface $translation) {
+    \Drupal::service("static_custom_api.alias_cache")->saveAliasByEntity($translation);
+  }
+
+  function static_custom_api_entity_translation_delete(\Drupal\Core\Entity\EntityInterface $translation) {
+    \Drupal::service("static_custom_api.alias_cache")->removeAlias($translation);
+  }
+
+
   /**
    * Implements hook_entity_delete().
    */
@@ -33,3 +44,13 @@
     \Drupal::service("static_custom_api.alias_cache")->removeAlias($entity);
 
   }
+
+  function static_custom_api_preprocess_html(&$variables) {
+    //dump($variables);
+    /*$node = \Drupal\node\Entity\Node::load(3);
+    $node_trans = $node->getTranslation("es");
+    dump($node_trans->get("path")->getValue()[0]);*/
+
+
+  }
+

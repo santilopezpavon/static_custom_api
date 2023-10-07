@@ -29,14 +29,29 @@ class AliasCache {
             return FALSE;
         } 
         $entity_data_for_json = $this->filesCache->getEntityDataForSaveJson($entity);
-        $this->saveAlias($entity_data_for_json["target_type"], $entity_data_for_json["id"],$entity_data_for_json["lang"]);
+        try {
+            $alias = $entity->get("path")->getValue()[0]["alias"];
+
+            \Drupal::logger("saveAliasByEntity")->alert(print_r($alias, true));
+            \Drupal::logger("saveAliasByEntity")->alert(print_r($entity->get("path")->getValue(), true));
+
+            \Drupal::logger("saveAliasByEntity")->alert(print_r($entity_data_for_json, true));
+            $this->saveAlias($entity_data_for_json["target_type"], $entity_data_for_json["id"],$entity_data_for_json["lang"], $alias);
+
+
+
+        } catch (\Throwable $th) {
+            //throw $th;
+        }
     }
 
-    public function saveAlias($entity_type, $id_entity, $lang) {
+    public function saveAlias($entity_type, $id_entity, $lang, $current_alias = NULL) {
         $origin_url = $this->getOriginUrl($entity_type, $id_entity);
         $alias = $this->getAliasFromOriginUrl($origin_url, $lang);
-        \Drupal::logger("saveAlias originurl")->alert(print_r($origin_url, true));
-        \Drupal::logger("saveAlias alias")->alert(print_r($alias, true));
+
+        if($current_alias !== NULL) {
+            $alias = $current_alias;
+        }
 
         if($alias === NULL) {
             return NULL;
