@@ -7,3 +7,12 @@ services:
   arguments: ["@file_system", "@serializer"]
  static_custom_api.alias_cache:
   class: Drupal\static_custom_api\Service\AliasCache
+ static_custom_api.jsons_generators:
+  class: Drupal\static_custom_api\Service\JsonsGeneratorService
+  arguments: ["@static_custom_api.alias_cache", "@static_custom_api.files_cache"]
+ static_custom_api.commands:
+    class: \Drupal\static_custom_api\Commands\StaticApiCommands
+    arguments: ["@static_custom_api.jsons_generators"]
+    tags:
+      - { name: drush.command }
+
