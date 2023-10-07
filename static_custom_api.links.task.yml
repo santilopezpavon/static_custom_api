@@ -1,0 +1,11 @@
+static_custom_api.tab_1:
+  route_name : static_custom_api.settings_form
+  title: Configuration
+  base_route: static_custom_api.settings_form
+  weight: 10
+
+static_custom_api.tab_2:
+  route_name: static_custom_api.action_form
+  title: Actions
+  base_route: static_custom_api.settings_form
+  weight: 20

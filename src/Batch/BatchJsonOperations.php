@@ -1,42 +1,101 @@
 <?php
+
 namespace Drupal\static_custom_api\Batch;
 
-class BatchJsonOperations {
+use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
+use Drupal\static_custom_api\Services\AliasCacheInterface;
+use Drupal\static_custom_api\Services\FilesCacheInterface;
 
-  
+class BatchJsonOperations implements ContainerInjectionInterface {
+
+  protected static $aliasCache;
+  protected static $filesCache;
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container) {
+    // Get the 'static_custom_api.alias_cache' and 'static_custom_api.files_cache' services.
+    static::$aliasCache = $container->get('static_custom_api.alias_cache');
+    static::$filesCache = $container->get('static_custom_api.files_cache');
+    
+    // Check if necessary services are available.
+    if (!static::$aliasCache || !static::$filesCache) {
+      throw new \RuntimeException('Failed to load necessary services.');
+    }
+    
+    // Return a new instance of this class.
+    return new static();
+  }
+
   /**
    * Handle batch completion.
+   *
+   * @param bool $success
+   *   Whether the batch operation was successful.
+   * @param array $results
+   *   Results of batch operations.
+   * @param array $operations
+   *   Batch operations to be processed.
    */
   public static function importFinished($success, $results, $operations) {
     $messenger = \Drupal::messenger();
-    return 'The JSONs creation has completed.';
-  }
-
-  public static function generateAliasFiles($type_content, $id_content, $lang, &$context) {
-    $alias_cache_service = \Drupal::service("static_custom_api.alias_cache");
-    $alias_cache_service->saveAlias($type_content, $id_content, $lang);
+    if ($success) {
+      // Display a success message to the user.
+      $messenger->addMessage('The JSONs creation has completed successfully.');
+    } else {
+      // Display an error message to the user.
+      $messenger->addError('The JSONs creation encountered errors.');
+    }
   }
 
   /**
-   * Process a single line.
+   * Generate alias files for a content type.
+   *
+   * @param string $type_content
+   *   The content type.
+   * @param int $id_content
+   *   The content ID.
+   * @param string $lang
+   *   The language code.
+   * @param array $context
+   *   The batch context.
    */
-  public static function generateEntityFiles($type_content, $id_content, &$context) {
-    $files_cache_service = \Drupal::service("static_custom_api.files_cache");
-
-    $storage = \Drupal::entityTypeManager()->getStorage($type_content);
-    $entity = $storage->load($id_content);
-
-    if(
-      !empty($entity) && $entity->isTranslatable() 
-    ) {
-      $trans_languages = $entity->getTranslationLanguages();
-      foreach ($trans_languages as $trans_language) {
-        $entity_trans = $entity->getTranslation($trans_language);
-        $files_cache_service->saveEntity($entity_trans);
-      }
-    } elseif(!empty($entity)) {
-      $files_cache_service->saveEntity($entity);
-    }    
+  public static function generateAliasFiles($type_content, $id_content, $lang, &$context) {
+    if (isset(static::$aliasCache)) {
+      // Generate alias files for the given content type, ID, and language.
+      static::$aliasCache->saveAlias($type_content, $id_content, $lang);
+    }
   }
 
+  /**
+   * Generate entity files for a content type.
+   *
+   * @param string $type_content
+   *   The content type.
+   * @param int $id_content
+   *   The content ID.
+   * @param array $context
+   *   The batch context.
+   */
+  public static function generateEntityFiles($type_content, $id_content, &$context) {
+    if (isset(static::$filesCache)) {
+      // Get the entity storage for the given content type.
+      $storage = \Drupal::entityTypeManager()->getStorage($type_content);
+      $entity = $storage->load($id_content);
+
+      if (!empty($entity) && $entity->isTranslatable()) {
+        $trans_languages = $entity->getTranslationLanguages();
+        foreach ($trans_languages as $trans_language) {
+          // Generate entity files for each translation of the entity.
+          $entity_trans = $entity->getTranslation($trans_language);
+          static::$filesCache->saveEntity($entity_trans);
+        }
+      } elseif (!empty($entity)) {
+        // Generate entity files for the default language.
+        static::$filesCache->saveEntity($entity);
+      }
+    }
+  }
 }

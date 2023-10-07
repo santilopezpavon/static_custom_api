@@ -5,6 +5,7 @@ static_custom_api.settings_form:
     _title: 'Static Custom Api Configuration'
   requirements:
     _permission: 'administer site configuration'
+  
 static_custom_api.action_form:
   path: '/admin/config/static-custom-api/actions'
   defaults:
