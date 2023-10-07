@@ -28,6 +28,8 @@ class ApiControllerBaseQueries extends ControllerBase {
      */
     protected $requestStack;
 
+    protected $aliasCache;
+
 
     /**
      * Constructor for ApiControllerBaseQueries.
@@ -37,9 +39,10 @@ class ApiControllerBaseQueries extends ControllerBase {
      * @param \Symfony\Component\HttpFoundation\RequestStack $requestStack
      *   The request stack.
      */
-    public function __construct(EntityCache $entityCache, RequestStack $requestStack) {
+    public function __construct(EntityCache $entityCache, RequestStack $requestStack, $aliasCache) {
         $this->entityCache = $entityCache;
         $this->requestStack = $requestStack;
+        $this->aliasCache = $aliasCache;
     }
 
     /**
@@ -48,7 +51,8 @@ class ApiControllerBaseQueries extends ControllerBase {
     public static function create(ContainerInterface $container) {
         return new static(
             $container->get('static_custom_api.entity_cache'),
-            $container->get('request_stack')
+            $container->get('request_stack'),
+            $container->get("static_custom_api.alias_cache")
         );
     }
 
@@ -60,6 +64,9 @@ class ApiControllerBaseQueries extends ControllerBase {
      */
     public function getNodeByAlias() {
         $content = $this->requestStack->getCurrentRequest()->getContent();
+        $force = $this->requestStack->getCurrentRequest()->query->get('force', false);
+        $lang_code = \Drupal::languageManager()->getCurrentLanguage()->getId();
+
     
         if (empty($content)) {
             return new JsonResponse(["error" => "No content provided"], 400);
@@ -70,24 +77,37 @@ class ApiControllerBaseQueries extends ControllerBase {
         if (!isset($decode["alias"])) {
             return new JsonResponse(["error" => "Alias not provided"], 400);
         }
+
+        if($force) {
+            $url = Url::fromUri('internal:' . $decode["alias"]);
     
-        $url = Url::fromUri('internal:' . $decode["alias"]);
+            if (!$url->isRouted()) {
+                return new JsonResponse(["error" => "Invalid alias"], 404);
+            }
+            $params = $url->getRouteParameters();
+            $entity_type = key($params);
+            $output["entity_type"] = $entity_type;
+            $output["id"] = $params[$entity_type];
+        } else {
+            $url = $this->aliasCache->getEntityCacheByAlias($decode["alias"], $lang_code);
+            if (empty($url)) {
+                return new JsonResponse(["error" => "Invalid alias"], 404);
+            }
+            $output["entity_type"] = $url["entity_type"];
+            $output["id"] = $url["id_entity"];
+        } 
     
-        if (!$url->isRouted()) {
-            return new JsonResponse(["error" => "Invalid alias"], 404);
-        }
-    
-        $params = $url->getRouteParameters();
-        $entity_type = key($params);
-        $output["entity_type"] = $entity_type;
-        $output["id"] = $params[$entity_type];
+       
+        return new JsonResponse(["data" => $output], 200);
+
+       
     
         $force = $this->requestStack->getCurrentRequest()->query->get('force', false);
     
         if ($force) {
-            $entity = $this->entityCache->getEntityFromDatabase($entity_type, $params[$entity_type], \Drupal::languageManager()->getCurrentLanguage()->getId());
+            $entity = $this->entityCache->getEntityFromDatabase($entity_type, $params[$entity_type], $lang_code);
         } else {
-            $entity = $this->entityCache->getEntityFromJSON($entity_type, $params[$entity_type], \Drupal::languageManager()->getCurrentLanguage()->getId());
+            $entity = $this->entityCache->getEntityFromJSON($entity_type, $params[$entity_type], $lang_code);
         }
     
         if (!$entity) {

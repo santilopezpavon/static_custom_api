@@ -33,6 +33,12 @@ class ActionsForm extends FormBase {
       '#submit' => ['::action1Submit'],
     ];
 
+    $form['action2'] = [
+      '#type' => 'submit',
+      '#value' => $this->t('Generate All Alias'),
+      '#submit' => ['::action2Submit'],
+    ];
+
     return $form;
   }
 
@@ -70,6 +76,40 @@ class ActionsForm extends FormBase {
     batch_set($batch);
   }
 
+  public function action2Submit(array &$form, FormStateInterface $form_state) {
+    // Get the required services.
+    $files_cache_service = \Drupal::service("static_custom_api.files_cache");
+
+    // Get cacheable entity types.
+    $entity_types_cacheable = $this->getCacheableEntityTypes($files_cache_service);
+    $languages_site =  \Drupal::languageManager()->getLanguages();
+    // Create a batch process.
+    $batch = [
+      'title' => $this->t('Importing JSONs...'),
+      'operations' => [],
+      'init_message' => $this->t('Starting...'),
+      'progress_message' => $this->t('Processed @current out of @total.'),
+      'error_message' => $this->t('An error occurred during processing.'),
+      'finished' => '\Drupal\static_custom_api\Batch\BatchJsonOperations::importFinished',
+    ];
+
+    // Add batch operations for each paragraph entity.
+    foreach ($entity_types_cacheable as $type_cacheable) {
+      $entity_query_service = \Drupal::entityQuery($type_cacheable);
+      $entities = $this->getParagraphEntities($entity_query_service);
+      foreach ($entities as $value) {
+        foreach ($languages_site as $languages_code => $languages_value) {
+          $this->addBatchOperationAlias($batch, $type_cacheable, $value, $languages_code);
+        }
+      }
+    }
+   
+
+    // Start the batch process.
+    batch_set($batch);
+  }
+
+
   /**
    * Helper function to get cacheable entity types.
    */
@@ -90,6 +130,13 @@ class ActionsForm extends FormBase {
   private function getParagraphEntities($entity_query_service) {
     $results = $entity_query_service->execute();
     return $results;
+  }
+
+  private function addBatchOperationAlias(&$batch, $type_cacheable, $value, $lang) {
+    $batch['operations'][] = [
+      '\Drupal\static_custom_api\Batch\BatchJsonOperations::generateAliasFiles',
+      [$type_cacheable, $value, $lang],
+    ];
   }
 
   /**

@@ -5,3 +5,5 @@ services:
  static_custom_api.files_cache:
   class: Drupal\static_custom_api\Service\FilesCache
   arguments: ["@file_system", "@serializer"]
+ static_custom_api.alias_cache:
+  class: Drupal\static_custom_api\Service\AliasCache

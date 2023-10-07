@@ -3,6 +3,7 @@ namespace Drupal\static_custom_api\Batch;
 
 class BatchJsonOperations {
 
+  
   /**
    * Handle batch completion.
    */
@@ -11,6 +12,10 @@ class BatchJsonOperations {
     return 'The JSONs creation has completed.';
   }
 
+  public static function generateAliasFiles($type_content, $id_content, $lang, &$context) {
+    $alias_cache_service = \Drupal::service("static_custom_api.alias_cache");
+    $alias_cache_service->saveAlias($type_content, $id_content, $lang);
+  }
 
   /**
    * Process a single line.

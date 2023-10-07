@@ -18,8 +18,8 @@ class BuildController extends ControllerBase {
    *   Un array renderizable con el formulario.
    */
   public function mostrarFormulario() {
+ 
 
-    
     /* $entity_type = "node";
     $bundle = "article";
     dump(\Drupal::entityTypeManager()->getDefinitions());*/
