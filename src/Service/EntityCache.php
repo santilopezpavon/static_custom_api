@@ -107,7 +107,7 @@ class EntityCache {
      * @return array|false
      *   The entity data as an array or FALSE if not found.
      */
-    public function getEntityFromJSON($entity_type, $id, $lang, $recursive = FALSE) {
+    public function getEntityFromJSON($entity_type, $id, $lang, $recursive = TRUE, $maxDeep = 4, &$currentDeep = NULL) {
         $entity = $this->filesCache->getEntityFile($entity_type, $id, $lang);
 
         if($recursive === TRUE) {
@@ -127,67 +127,19 @@ class EntityCache {
         return $entity;
     }
 
-
-    public function createEntityCache($entity) {
-
-    }
-
     public function deleteEntityCache($entity) {
         $this->deleteAlias($entity);
         if (!$this->filesCache->isEntityTypeJsonAble($entity->getEntityTypeId())) {
             return FALSE;
-        } 
-      /*  try {
-            $data_entity = $this->filesCache->getEntityDataForSaveJson($entity);
-            $data_entity_json = $this->filesCache->getEntityFile(
-                $data_entity["target_type"], 
-                $data_entity["id"], 
-                $data_entity["lang"]
-            );
-            $entity_serialized = $this->filesCache->getEntityFile($data_entity["target_type"], $data_entity["id"], $data_entity["lang"]);
-
-            $anterior_alias = $entity_serialized["alias_legacy"];
-         
-            // Borrar alias
-            $this->aliasCache->removeAliasByAlias($anterior_alias, $data_entity["lang"]);
-        } catch (\Throwable $th) {
-            //throw $th;
-        }*/
-        $this->filesCache->removeEntity($entity);
-
-        
+        }   
+        $this->filesCache->removeEntity($entity);        
     }
 
     public function updateEntityCache($entity) {
         $this->updateAlias($entity);
         if (!$this->filesCache->isEntityTypeJsonAble($entity->getEntityTypeId())) {
             return FALSE;
-        }  
-        /*
-        try {
-            $data_entity = $this->filesCache->getEntityDataForSaveJson($entity);
-            $data_entity_json = $this->filesCache->getEntityFile(
-                $data_entity["target_type"], 
-                $data_entity["id"], 
-                $data_entity["lang"]
-            );
-            $entity_serialized = $this->filesCache->getEntityFile($data_entity["target_type"], $data_entity["id"], $data_entity["lang"]);
-
-            
-            if($entity_serialized === FALSE) { // Crear
-                $this->aliasCache->saveAliasByEntity($entity);
-            } else { // Actualizar
-                $anterior_alias = $entity_serialized["alias_legacy"];           
-                // Borrar alias
-                $this->aliasCache->removeAliasByAlias($anterior_alias, $data_entity["lang"]);
-                // Generar nuevo alias
-                $this->aliasCache->saveAliasByEntity($entity);            
-            }
-            } catch (\Throwable $th) {
-                //throw $th;
-            }
-        
-*/
+        }    
 
         $this->filesCache->saveEntity($entity);
     }

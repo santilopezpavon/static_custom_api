@@ -21,20 +21,7 @@ class AliasCache {
         $this->alias_manager = \Drupal::service('path_alias.manager');
         $this->fileSystem = \Drupal::service('file_system');
         $this->filesCache = \Drupal::service('static_custom_api.files_cache');
-    } 
-
-
-    /*public function saveAliasByEntity($entity) {
-        if (!$this->filesCache->isEntityTypeJsonAble($entity->getEntityTypeId())) {
-            return FALSE;
-        } 
-        $entity_data_for_json = $this->filesCache->getEntityDataForSaveJson($entity);
-        try {
-            $this->saveAlias($entity_data_for_json["target_type"], $entity_data_for_json["id"],$entity_data_for_json["lang"]);
-        } catch (\Throwable $th) {
-            //throw $th;
-        }
-    }*/
+    }     
 
     public function saveAlias($entity_type, $id_entity, $lang, $current_alias = NULL) {
         $origin_url = $this->getOriginUrl($entity_type, $id_entity);
@@ -46,9 +33,7 @@ class AliasCache {
 
         if($alias === NULL) {
             return NULL;
-        }
-        //$url = Url::fromUri('internal:' . $origin_url);
-       
+        }       
 
         $directory = $this->base_folder_files . "/" . $lang . "" . $alias;
         $this->fileSystem->prepareDirectory($directory, FileSystemInterface::CREATE_DIRECTORY);
@@ -108,11 +93,7 @@ class AliasCache {
         if(file_exists($path_file_real)) {
             $this->fileSystem->deleteRecursive($path_file_real);
         }
-    }
-
-    public function createAliasByAlias() {
-        
-    }
+    }  
 
     public function removeAliasByEntity($entity) {
         if (!$this->filesCache->isEntityTypeJsonAble($entity->getEntityTypeId())) {

@@ -97,8 +97,7 @@ class ApiControllerBaseQueries extends ControllerBase {
             $output["id"] = $url["id_entity"];
         } 
     
-       
-        return new JsonResponse(["data" => $output], 200);
+        $output["lang"] = $lang_code;
 
        
     
@@ -107,7 +106,7 @@ class ApiControllerBaseQueries extends ControllerBase {
         if ($force) {
             $entity = $this->entityCache->getEntityFromDatabase($entity_type, $params[$entity_type], $lang_code);
         } else {
-            $entity = $this->entityCache->getEntityFromJSON($entity_type, $params[$entity_type], $lang_code);
+            $entity = $this->entityCache->getEntityFromJSON($output["entity_type"], $output["id"], $lang_code);
         }
     
         if (!$entity) {
