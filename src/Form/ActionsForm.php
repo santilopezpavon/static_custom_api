@@ -7,7 +7,7 @@ use Drupal\Core\Form\FormStateInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\static_custom_api\Service\Core\AliasCache;
 use Drupal\static_custom_api\Service\Core\FilesCache;
-use Drupal\static_custom_api\Service\JsonsGeneratorService;
+use Drupal\static_custom_api\Service\Batch\JsonsGeneratorService;
 
 
 /**

@@ -1,5 +1,5 @@
 <?php
-namespace Drupal\static_custom_api\Service;
+namespace Drupal\static_custom_api\Service\Batch;
 
 use Drupal\static_custom_api\Service\Core\AliasCache;
 use Drupal\static_custom_api\Service\Core\FilesCache;

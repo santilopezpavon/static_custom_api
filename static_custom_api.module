@@ -1,80 +1,55 @@
 <?php
 
-function static_custom_api_entity_insert($entity) {
-  /*$type = $entity->getEntityTypeId();
-  $id = $entity->id();
+use Drupal\Core\Entity\EntityInterface;
 
-  \Drupal::logger("static_custom_api_entity_insert")->alert(print_r([
-    "type" => $type,
-    "id" => $id,
-    "lang" => $entity->language()->getId()
+/**
+ * Implements hook_entity_insert().
+ *
+ * Updates the entity cache for a newly inserted entity.
+ *
+ * @param \Drupal\Core\Entity\EntityInterface $entity
+ *   The entity that was inserted.
+ */
+function static_custom_api_entity_insert(EntityInterface $entity) {
+  // Update the entity cache for the newly inserted entity.
+  \Drupal::service('static_custom_api.entity_live_alter')->updateEntityCache($entity);
+}
 
-  ], true));;*/
-  \Drupal::service("static_custom_api.entity_cache")->updateEntityCache($entity);
+/**
+ * Implements hook_entity_update().
+ *
+ * Updates the entity cache when an entity is updated.
+ *
+ * @param \Drupal\Core\Entity\EntityInterface $entity
+ *   The entity that was updated.
+ */
+function static_custom_api_entity_update(EntityInterface $entity) {
+  // Update the entity cache when an entity is updated.
+  \Drupal::service('static_custom_api.entity_live_alter')->updateEntityCache($entity);
+}
 
+/**
+ * Implements hook_entity_delete().
+ *
+ * Deletes the entity cache when an entity is deleted.
+ *
+ * @param \Drupal\Core\Entity\EntityInterface $entity
+ *   The entity that was deleted.
+ */
+function static_custom_api_entity_delete(EntityInterface $entity) {
+  // Delete the entity cache when an entity is deleted.
+  \Drupal::service('static_custom_api.entity_live_alter')->deleteEntityCache($entity);
+}
 
-  }
-  /**
-   * Hook_entity_postsave
-   */
-  function static_custom_api_entity_update($entity) {
-    /*$type = $entity->getEntityTypeId();
-    $id = $entity->id();
-
-    \Drupal::logger("static_custom_api_entity_update")->alert(print_r([
-      "type" => $type,
-      "id" => $id,
-      "lang" => $entity->language()->getId()
-
-    ], true));;*/
-
-    \Drupal::service("static_custom_api.entity_cache")->updateEntityCache($entity);
-    
-  }
-
-  /**
-   * Hook_entity_postsave
-   */
-  function static_custom_api_entity_postdelete($entity) {
-    // \Drupal::service("static_custom_api.entity_cache")->deleteEntityCache($entity);
-  }
-
-  function static_custom_api_entity_delete(\Drupal\Core\Entity\EntityInterface $entity) {
-   /* $type = $entity->getEntityTypeId();
-    $id = $entity->id();
-
-    \Drupal::logger("static_custom_api_entity_delete")->alert(print_r([
-      "type" => $type,
-      "id" => $id,
-      "lang" => $entity->language()->getId()
-
-    ], true));;*/
-    \Drupal::service("static_custom_api.entity_cache")->deleteEntityCache($entity);
-  }
-
- 
-  function static_custom_api_entity_translation_delete(\Drupal\Core\Entity\EntityInterface $translation) {
-    /*$type = $translation->getEntityTypeId();
-    $id = $translation->id();
-
-    \Drupal::logger("static_custom_api_entity_translation_delete")->alert(print_r([
-      "type" => $type,
-      "id" => $id,
-      "lang" => $translation->language()->getId()
-    ], true));*/
-
-    \Drupal::service("static_custom_api.entity_cache")->deleteEntityCache($translation);
-  }
-
-// [type] => path_alias [id] => 241 [lang] => en
-
-function static_custom_api_preprocess_html(&$variables) {
-  /*$entityTypeManager = \Drupal::service('entity_type.manager');
-  $alias_entity = $entityTypeManager->getStorage("path_alias")->load(1691);
-
-  $entity_cache = \Drupal::service('static_custom_api.entity_cache')->getInfoAliasEntity($alias_entity);
-  dump($entity_cache);*/
-
-
-  
+/**
+ * Implements hook_entity_translation_delete().
+ *
+ * Deletes the entity cache when a translation of an entity is deleted.
+ *
+ * @param \Drupal\Core\Entity\EntityInterface $translation
+ *   The translation entity that was deleted.
+ */
+function static_custom_api_entity_translation_delete(EntityInterface $translation) {
+  // Delete the entity cache when a translation of an entity is deleted.
+  \Drupal::service('static_custom_api.entity_live_alter')->deleteEntityCache($translation);
 }

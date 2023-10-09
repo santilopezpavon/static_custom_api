@@ -3,7 +3,7 @@
 namespace Drupal\static_custom_api\Commands;
 
 use Drush\Commands\DrushCommands;
-use Drupal\static_custom_api\Service\JsonsGeneratorService;
+use Drupal\static_custom_api\Service\Batch\JsonsGeneratorService;
 
 /**
  * A Drush command file.
@@ -23,7 +23,7 @@ class StaticApiCommands extends DrushCommands {
   /**
    * Constructor.
    *
-   * @param \Drupal\static_custom_api\Service\JsonsGeneratorService $jsonGeneratorService
+   * @param \Drupal\static_custom_api\Service\Batch\JsonsGeneratorService $jsonGeneratorService
    *   The JSON generator service.
    */
   public function __construct(JsonsGeneratorService $jsonGeneratorService) {

@@ -6,7 +6,7 @@ use Drupal\Core\Controller\ControllerBase;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Drupal\Core\Url;
-use Drupal\static_custom_api\Service\EntityCache;
+use Drupal\static_custom_api\Service\Getter\EntityCache;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -17,7 +17,7 @@ class ApiControllerBaseQueries extends ControllerBase {
     /**
      * The entity cache service.
      *
-     * @var \Drupal\static_custom_api\Service\EntityCache
+     * @var \Drupal\static_custom_api\Service\Getter\EntityCache
      */
     protected $entityCache;
 
@@ -34,7 +34,7 @@ class ApiControllerBaseQueries extends ControllerBase {
     /**
      * Constructor for ApiControllerBaseQueries.
      *
-     * @param \Drupal\static_custom_api\Service\EntityCache $entityCache
+     * @param \Drupal\static_custom_api\Service\Getter\EntityCache $entityCache
      *   The entity cache service.
      * @param \Symfony\Component\HttpFoundation\RequestStack $requestStack
      *   The request stack.

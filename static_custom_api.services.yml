@@ -1,6 +1,6 @@
 services:
  static_custom_api.entity_cache:
-  class: Drupal\static_custom_api\Service\EntityCache
+  class: Drupal\static_custom_api\Service\Getter\EntityCache
   arguments: ["@static_custom_api.files_cache", "@serializer", "@entity_type.manager", "@static_custom_api.alias_cache"]
  static_custom_api.files_cache:
   class: Drupal\static_custom_api\Service\Core\FilesCache
@@ -9,11 +9,15 @@ services:
   class: Drupal\static_custom_api\Service\Core\AliasCache
   arguments: ["@path_alias.manager", "@file_system", "@static_custom_api.files_cache"]
  static_custom_api.jsons_generators:
-  class: Drupal\static_custom_api\Service\JsonsGeneratorService
+  class: Drupal\static_custom_api\Service\Batch\JsonsGeneratorService
   arguments: ["@static_custom_api.alias_cache", "@static_custom_api.files_cache"]
  static_custom_api.commands:
     class: \Drupal\static_custom_api\Commands\StaticApiCommands
     arguments: ["@static_custom_api.jsons_generators"]
     tags:
       - { name: drush.command }
+ static_custom_api.entity_live_alter:
+  class: Drupal\static_custom_api\Service\LiveEntities\EntityLiveAlter
+  arguments: ["@static_custom_api.files_cache", "@serializer", "@entity_type.manager", "@static_custom_api.alias_cache"]
+
 
