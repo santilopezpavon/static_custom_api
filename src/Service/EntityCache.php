@@ -2,7 +2,7 @@
 
 namespace Drupal\static_custom_api\Service;
 
-use Drupal\static_custom_api\Service\FilesCache;
+use Drupal\static_custom_api\Service\Core\FilesCache;
 use Symfony\Component\Serializer\Serializer;
 use Drupal\Core\Entity\EntityTypeManager;
 
@@ -17,7 +17,7 @@ class EntityCache {
     /**
      * The FilesCache service.
      *
-     * @var \Drupal\static_custom_api\Service\FilesCache
+     * @var \Drupal\static_custom_api\Service\Core\FilesCache
      */
     protected $filesCache;
 
@@ -40,7 +40,7 @@ class EntityCache {
     /**
      * Constructs an EntityCache object.
      *
-     * @param \Drupal\static_custom_api\Service\FilesCache $filesCache
+     * @param \Drupal\static_custom_api\Service\Core\FilesCache $filesCache
      *   The FilesCache service.
      * @param \Symfony\Component\Serializer\Serializer $serializer
      *   The Symfony Serializer service.

@@ -1,5 +1,5 @@
 <?php
-namespace Drupal\static_custom_api\Service;
+namespace Drupal\static_custom_api\Service\Core;
 
 use Drupal\Core\File\FileSystemInterface;
 use Symfony\Component\Serializer\Serializer;

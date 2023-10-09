@@ -4,8 +4,8 @@ namespace Drupal\static_custom_api\Batch;
 
 use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
-use Drupal\static_custom_api\Service\AliasCache;
-use Drupal\static_custom_api\Service\FilesCache;
+use Drupal\static_custom_api\Service\Core\AliasCache;
+use Drupal\static_custom_api\Service\Core\FilesCache;
 
 class BatchJsonOperations implements ContainerInjectionInterface {
 

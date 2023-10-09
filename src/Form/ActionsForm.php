@@ -5,8 +5,8 @@ namespace Drupal\static_custom_api\Form;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
-use Drupal\static_custom_api\Service\AliasCache;
-use Drupal\static_custom_api\Service\FilesCache;
+use Drupal\static_custom_api\Service\Core\AliasCache;
+use Drupal\static_custom_api\Service\Core\FilesCache;
 use Drupal\static_custom_api\Service\JsonsGeneratorService;
 
 

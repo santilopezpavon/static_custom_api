@@ -3,10 +3,11 @@ services:
   class: Drupal\static_custom_api\Service\EntityCache
   arguments: ["@static_custom_api.files_cache", "@serializer", "@entity_type.manager", "@static_custom_api.alias_cache"]
  static_custom_api.files_cache:
-  class: Drupal\static_custom_api\Service\FilesCache
+  class: Drupal\static_custom_api\Service\Core\FilesCache
   arguments: ["@file_system", "@serializer"]
  static_custom_api.alias_cache:
-  class: Drupal\static_custom_api\Service\AliasCache
+  class: Drupal\static_custom_api\Service\Core\AliasCache
+  arguments: ["@path_alias.manager", "@file_system", "@static_custom_api.files_cache"]
  static_custom_api.jsons_generators:
   class: Drupal\static_custom_api\Service\JsonsGeneratorService
   arguments: ["@static_custom_api.alias_cache", "@static_custom_api.files_cache"]
