@@ -89,7 +89,10 @@ class ApiControllerBaseQueries extends ControllerBase {
             $output["entity_type"] = $entity_type;
             $output["id"] = $params[$entity_type];
         } else {
-            $url = $this->aliasCache->getEntityCacheByAlias($decode["alias"], $lang_code);
+            $mod_alias = $decode["alias"];
+            $mod_alias = str_replace("/" . $lang_code . "/", "/", $mod_alias);
+
+            $url = $this->aliasCache->getEntityCacheByAlias($mod_alias, $lang_code);
             if (empty($url)) {
                 return new JsonResponse(["error" => "Invalid alias"], 404);
             }
