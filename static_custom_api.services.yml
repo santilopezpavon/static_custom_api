@@ -19,5 +19,7 @@ services:
  static_custom_api.entity_live_alter:
   class: Drupal\static_custom_api\Service\LiveEntities\EntityLiveAlter
   arguments: ["@static_custom_api.files_cache", "@serializer", "@entity_type.manager", "@static_custom_api.alias_cache"]
+ static_custom_api.jsons_sync_front:
+  class: Drupal\static_custom_api\Service\Sync\SyncFront
 
 

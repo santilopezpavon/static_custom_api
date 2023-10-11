@@ -53,3 +53,38 @@ function static_custom_api_entity_translation_delete(EntityInterface $translatio
   // Delete the entity cache when a translation of an entity is deleted.
   \Drupal::service('static_custom_api.entity_live_alter')->deleteEntityCache($translation);
 }
+
+
+function static_custom_api_static_custom_api_save(&$data_save) {
+  \Drupal::service("static_custom_api.jsons_sync_front")->updateFile($data_save["fileName"], $data_save["data"]);
+}
+
+function static_custom_api_static_custom_api_remove(&$data_remove) {
+  \Drupal::service("static_custom_api.jsons_sync_front")->deleteFile($data_save["fileName"]);
+
+
+}
+
+function static_custom_api_preprocess_html(&$variables) {
+  //$service = \Drupal::service("static_custom_api.jsons_sync_front");
+   //$service->deleteFile("/alias/en/abbas-acsi-quibus-ratis");
+  /*try {
+    $service = \Drupal::service("static_custom_api.jsons_sync_front");
+    // $service->deleteFile("/alias/en/zelus-3");
+
+    $menu = '/menu/menu-test/menu--account--en.json';
+    $data = [
+      "test" => true
+    ];
+
+    $service->updateFile($menu, $data);
+
+  
+  } catch (\Throwable $th) {
+    dump("Error");
+    dump($th->getMessage());
+  }*/
+}
+
+
+

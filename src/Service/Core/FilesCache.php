@@ -14,7 +14,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  */
 class FilesCache {
 
-    private $base_folder_files = 'custom-build';
+    private $base_folder_files;
     private $entity_type_cached;
     
     /**
@@ -48,6 +48,8 @@ class FilesCache {
         if(is_array($config)) {
             $this->entity_type_cached = \Drupal::config("static_custom_api.settings")->get("content_types_array");
         } 
+
+        $this->base_folder_files = \Drupal::config("static_custom_api.settings")->get("directory");
     }   
 
     public function removeEntity($entity) {
@@ -63,6 +65,10 @@ class FilesCache {
         if (file_exists($path_file_real)) {
             $this->fileSystem->delete($path_file_real);
         } 
+
+        return [
+            "fileName" => $path_file["path_file"]
+        ];
     }
 
     /**
@@ -90,9 +96,12 @@ class FilesCache {
 
         $path_file = $this->getPathFile($entity_data_for_json);        
 
-        $this->saveEntityInJson($entity, $path_file["real_path_file"], $path_file["file_url"]);
+        $entity_json_string = $this->saveEntityInJson($entity, $path_file["real_path_file"], $path_file["file_url"]);
 
-        return TRUE;
+        return [
+            "data" => json_decode($entity_data_for_json, TRUE),
+            "fileName" => $path_file["path_file"]
+        ];
     }
 
     /**
@@ -178,6 +187,7 @@ class FilesCache {
 
         $json_entity = json_encode($json_entity);
         $this->fileSystem->saveData($json_entity, $file_path, FileSystemInterface::EXISTS_REPLACE); 
+        return json_entity; // String
     }
 
     /**
@@ -271,9 +281,9 @@ class FilesCache {
             $folder1 = number_format($id / 200, 0);
             $folder2 = number_format($folder1 / 200, 0);
             $folder3 = number_format($folder2 / 200, 0);
-            return "public://custom-build" . "/" . $target_type . "/" . $folder1 . "/" . $folder2 . "/" . $folder3 . "/";
+            return $this->base_folder_files . "/" . $target_type . "/" . $folder1 . "/" . $folder2 . "/" . $folder3 . "/";
         } else {
-            return "public://custom-build" . "/" . $target_type . "/";
+            return $this->base_folder_files . "/" . $target_type . "/";
         }    
     }
 }

@@ -19,7 +19,7 @@ class AliasCache {
      *
      * @var string
      */
-    private $base_folder_files = 'public://custom-build/alias';
+    private $base_folder_files;
 
     /**
      * The alias manager service.
@@ -56,6 +56,7 @@ class AliasCache {
         $this->alias_manager = $alias_manager;
         $this->fileSystem = $fileSystem;
         $this->filesCache = $filesCache;
+        $this->base_folder_files =  \Drupal::config("static_custom_api.settings")->get("directory") . '/alias';
     }
 
     /**
@@ -96,6 +97,11 @@ class AliasCache {
 
         $data_alias_json = json_encode($data_alias);
         $this->fileSystem->saveData($data_alias_json, $directory . "/data.json", FileSystemInterface::EXISTS_REPLACE);
+    
+        return [
+            "fileName" => $directory . "/data.json",
+            "data" => $data_alias
+        ];
     }
 
     /**
@@ -182,6 +188,10 @@ class AliasCache {
         if (file_exists($path_file_real)) {
             $this->fileSystem->deleteRecursive($path_file_real);
         }
+
+        return [
+            "fileName" => $this->base_folder_files . "/" . $lang . $alias
+        ];
     }  
 
     /**

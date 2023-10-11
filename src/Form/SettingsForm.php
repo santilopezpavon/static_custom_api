@@ -23,6 +23,14 @@ class SettingsForm extends ConfigFormBase {
 
   public function buildForm(array $form, FormStateInterface $form_state) {
     $config = $this->config('static_custom_api.settings');    
+
+
+    $form["directory"] = [
+      '#type' => 'textfield',
+      '#title' => t('Directory'),
+      '#default_value' => "public://custom-build",
+      '#required' => TRUE,
+    ];
    
     $form["content_types"] = [
         '#type' => 'checkboxes',
@@ -31,6 +39,20 @@ class SettingsForm extends ConfigFormBase {
         '#default_value' => $config->get('content_types'),
     ];
 
+    $form['sync_front'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Sync with FrontEnd.'),
+      '#default_value' => $config->get('sync_front'),
+    );
+
+    $form["url_front"] = [
+      '#type' => 'textfield',
+      '#title' => t('End Point FrontEnd'),
+      '#default_value' => $config->get('url_front'),
+
+    ];
+
+
 
     return parent::buildForm($form, $form_state);
   }
@@ -38,6 +60,9 @@ class SettingsForm extends ConfigFormBase {
   public function submitForm(array &$form, FormStateInterface $form_state) {
     $config = $this->config('static_custom_api.settings');
     $config->set('content_types', $form_state->getValue('content_types'));
+    $config->set('directory', $form_state->getValue('directory'));
+    $config->set('sync_front', $form_state->getValue('sync_front'));
+    $config->set('url_front', $form_state->getValue('url_front'));
 
     $nonAssociativeArray = [];
 
@@ -45,6 +70,12 @@ class SettingsForm extends ConfigFormBase {
         if ($value !== 0) {
             $nonAssociativeArray[] = $key;
         }
+    }
+
+    if($form_state->getValue('sync_front') == "1") {
+      $config->set('url_front_bool', TRUE);
+    } else {
+      $config->set('url_front_bool', FALSE);
     }
 
     $config->set('content_types_array', $nonAssociativeArray);

@@ -59,7 +59,9 @@ class EntityLiveAlter {
         if (!$this->filesCache->isEntityTypeJsonAble($entity->getEntityTypeId())) {
             return FALSE;
         }   
-        $this->filesCache->removeEntity($entity);        
+        // Delete Entity
+        $data_remove = $this->filesCache->removeEntity($entity);  
+        \Drupal::service("module_handler")->invokeAll('static_custom_api_remove', [&$data_remove]);      
     }
 
     public function updateEntityCache($entity) {
@@ -67,8 +69,9 @@ class EntityLiveAlter {
         if (!$this->filesCache->isEntityTypeJsonAble($entity->getEntityTypeId())) {
             return FALSE;
         }    
-
-        $this->filesCache->saveEntity($entity);
+        // Create or update entity
+        $data_save = $this->filesCache->saveEntity($entity);
+        \Drupal::service("module_handler")->invokeAll('static_custom_api_save', [&$data_save]); 
     }
 
     public function deleteAlias($entity) {
@@ -77,14 +80,16 @@ class EntityLiveAlter {
             return NULL;
         }
 
-        $this->aliasCache->removeAliasByAlias($info_alias["alias"], $info_alias["lang"]);
-        
-        $storage = $this->entityManager->getStorage($info_alias["target_type"]);
+        // Remove Alias.
+        $data_remove = $this->aliasCache->removeAliasByAlias($info_alias["alias"], $info_alias["lang"]);
+        \Drupal::service("module_handler")->invokeAll('static_custom_api_remove', [&$data_remove]);   
+        // Remove Entity in Current Lang. Todo: Revisar porque la entidad ya está eliminada.
+        /*$storage = $this->entityManager->getStorage($info_alias["target_type"]);
         $entity_db = $storage->load($info_alias["target_id"]);
         if(!empty($entity_db) && method_exists($entity_db, "hasTranslation") && $entity_db->hasTranslation($info_alias["lang"])) {
             $entity_db = $entity_db->getTranslation($info_alias["lang"]);
             $this->filesCache->removeEntity($entity_db);
-        }
+        }*/
         
     }
 
@@ -97,25 +102,35 @@ class EntityLiveAlter {
         $entity_serialized = $this->filesCache->getEntityFile($info_alias["target_type"], $info_alias["target_id"], $info_alias["lang"]);
         $anterior_alias = $entity_serialized["alias_legacy"];  
 
+        // Update Alias
         if($anterior_alias != $info_alias["alias"]) { // Update
-            $this->aliasCache->removeAliasByAlias($anterior_alias, $info_alias["lang"]);
 
-            $this->aliasCache->saveAlias(
+            // Remove Alias
+            $data_remove = $this->aliasCache->removeAliasByAlias($anterior_alias, $info_alias["lang"]);
+            \Drupal::service("module_handler")->invokeAll('static_custom_api_remove', [&$data_remove]);  
+
+            // Create Alias
+            $data_save = $this->aliasCache->saveAlias(
                 $info_alias["target_type"], 
                 $info_alias["target_id"],
                 $info_alias["lang"],
                 $info_alias["alias"]
             ); 
+            \Drupal::service("module_handler")->invokeAll('static_custom_api_save', [&$data_save]);
 
+            // Update Entity
             $storage = $this->entityManager->getStorage($info_alias["target_type"]);
             $entity_db = $storage->load($info_alias["target_id"]);
             if(method_exists($entity_db, "hasTranslation") && $entity_db->hasTranslation($info_alias["lang"])) {
                 $entity_db = $entity_db->getTranslation($info_alias["lang"]);
             }
-            $this->filesCache->saveEntity($entity_db);
+            $data_save_2 = $this->filesCache->saveEntity($entity_db);
+
+            \Drupal::service("module_handler")->invokeAll('static_custom_api_save', [&$data_save_2]);
 
             
-        } else { // Create
+        } else { 
+            // Create alias
             $this->aliasCache->saveAlias(
                 $info_alias["target_type"], 
                 $info_alias["target_id"],
