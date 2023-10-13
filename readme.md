@@ -1,4 +1,5 @@
 # WIP
+* SECURIZATION ENDPOINT NEXTJS TO LIVE ALTER ENTITIES
 * Improve the current code
 * Saving Views in JSON (Axiliar module)
 * Remove batch api by UI, is more slow than drush command
