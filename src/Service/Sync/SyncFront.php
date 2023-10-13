@@ -18,13 +18,13 @@ class SyncFront {
         $this->end_point =  \Drupal::config("static_custom_api.settings")->get("url_front"); 
         $this->doSync = \Drupal::config("static_custom_api.settings")->get("url_front_bool"); 
         $this->base_folder = \Drupal::config("static_custom_api.settings")->get("directory"); 
-
     }
 
     public function deleteFile($file) {
         if($this->doSync === FALSE) {
             return FALSE;
         }
+        \Drupal::logger("deleteFile")->alert(print_r($file, true));
         try {
             $request = $this->client->delete($this->end_point, [
                 'json' => [
@@ -42,6 +42,8 @@ class SyncFront {
         if($this->doSync === FALSE) {
             return FALSE;
         }
+        \Drupal::logger("updateFile")->alert(print_r($file, true));
+        \Drupal::logger("updateFile")->alert(print_r($data_file, true));
         try {
             $request = $this->client->post($this->end_point, [
                 'json' => [

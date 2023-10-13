@@ -60,7 +60,7 @@ function static_custom_api_static_custom_api_save(&$data_save) {
 }
 
 function static_custom_api_static_custom_api_remove(&$data_remove) {
-  \Drupal::service("static_custom_api.jsons_sync_front")->deleteFile($data_save["fileName"]);
+  \Drupal::service("static_custom_api.jsons_sync_front")->deleteFile($data_remove["fileName"]);
 
 
 }

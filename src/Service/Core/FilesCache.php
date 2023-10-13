@@ -99,7 +99,7 @@ class FilesCache {
         $entity_json_string = $this->saveEntityInJson($entity, $path_file["real_path_file"], $path_file["file_url"]);
 
         return [
-            "data" => json_decode($entity_data_for_json, TRUE),
+            "data" => json_decode($entity_json_string, TRUE),
             "fileName" => $path_file["path_file"]
         ];
     }
@@ -187,7 +187,7 @@ class FilesCache {
 
         $json_entity = json_encode($json_entity);
         $this->fileSystem->saveData($json_entity, $file_path, FileSystemInterface::EXISTS_REPLACE); 
-        return json_entity; // String
+        return $json_entity; // String
     }
 
     /**
