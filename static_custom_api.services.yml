@@ -21,5 +21,7 @@ services:
   arguments: ["@static_custom_api.files_cache", "@serializer", "@entity_type.manager", "@static_custom_api.alias_cache"]
  static_custom_api.jsons_sync_front:
   class: Drupal\static_custom_api\Service\Sync\SyncFront
+  arguments: ["@http_client", "@config.factory"]
+
 
 

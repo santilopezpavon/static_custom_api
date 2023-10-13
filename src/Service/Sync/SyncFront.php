@@ -2,63 +2,131 @@
 
 namespace Drupal\static_custom_api\Service\Sync;
 
-
+/**
+ * Defines the SyncFront class.
+ *
+ * This class handles synchronization with a frontend system.
+ *
+ * @package Drupal\static_custom_api\Service\Sync
+ */
 class SyncFront {
 
-    private $end_point; 
-    
+    /**
+     * The API endpoint for synchronization.
+     *
+     * @var string
+     */
+    private $end_point;
+
+    /**
+     * The HTTP client for making API requests.
+     *
+     * @var \GuzzleHttp\ClientInterface
+     */
     private $client;
 
+    /**
+     * Flag to indicate whether synchronization is enabled.
+     *
+     * @var bool
+     */
     private $doSync = FALSE;
 
+    /**
+     * The base folder for files.
+     *
+     * @var string
+     */
     private $base_folder;
 
-    public function __construct() {
-        $this->client = \Drupal::httpClient();  
-        $this->end_point =  \Drupal::config("static_custom_api.settings")->get("url_front"); 
-        $this->doSync = \Drupal::config("static_custom_api.settings")->get("url_front_bool"); 
-        $this->base_folder = \Drupal::config("static_custom_api.settings")->get("directory"); 
+    /**
+     * The limit for error log messages.
+     *
+     * @var int
+     */
+    private $errorLogLimit;
+
+    /**
+     * Constructs a new SyncFront object.
+     *
+     * @param \GuzzleHttp\ClientInterface $http_client
+     *   The HTTP client for making API requests.
+     * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
+     *   The configuration factory for retrieving settings.
+     */
+    public function __construct($http_client, $config_factory) {
+        $this->client = $http_client;  
+        $config = $config_factory->get('static_custom_api.settings');
+        $this->end_point =  $config->get("url_front"); 
+        $this->doSync = $config->get("url_front_bool"); 
+        $this->base_folder = $config->get("directory"); 
+        $this->errorLogLimit = 255; // Limit for error log messages.
     }
 
+    /**
+     * Deletes a file from the frontend system.
+     *
+     * @param string $file
+     *   The file to be deleted.
+     *
+     * @return mixed
+     *   The result of the deletion operation.
+     */
     public function deleteFile($file) {
-        if($this->doSync === FALSE) {
+        if (!$this->doSync) {
             return FALSE;
         }
-        \Drupal::logger("deleteFile")->alert(print_r($file, true));
         try {
             $request = $this->client->delete($this->end_point, [
                 'json' => [
-                  'fileName'=> $this->processFileName($file)
+                  'fileName' => $this->processFileName($file)
                 ]
             ]);
             return json_decode($request->getBody());
         } catch (\Throwable $th) {
-            //throw $th;
+            \Drupal::logger("deleteFile")->error(substr($th->getMessage(), 0, $this->errorLogLimit));
         }
         return FALSE;
     }
 
-    public function updateFile($file, $data_file) {
-        if($this->doSync === FALSE) {
+    /**
+     * Updates a file on the frontend system.
+     *
+     * @param string $file
+     *   The file to be updated.
+     * @param mixed $fileData
+     *   The data to update the file.
+     *
+     * @return mixed
+     *   The result of the update operation.
+     */
+    public function updateFile($file, $fileData) {
+        if (!$this->doSync) {
             return FALSE;
         }
-        \Drupal::logger("updateFile")->alert(print_r($file, true));
-        \Drupal::logger("updateFile")->alert(print_r($data_file, true));
         try {
             $request = $this->client->post($this->end_point, [
                 'json' => [
-                  'fileName'=> $this->processFileName($file),
-                  "data" =>  $data_file
+                  'fileName' => $this->processFileName($file),
+                  "data" => $fileData
                 ]
             ]);
             return json_decode($request->getBody());
         } catch (\Throwable $th) {
-            //throw $th;
+            \Drupal::logger("updateFile")->error(substr($th->getMessage(), 0, $this->errorLogLimit));
         }
-
         return FALSE;        
-    }    
+    }
 
+    /**
+     * Processes a file name by removing the base folder.
+     *
+     * @param string $fileName
+     *   The file name to process.
+     *
+     * @return string
+     *   The processed file name.
+     */
     private function processFileName($fileName) {
         return str_replace($this->base_folder, '', $fileName);       
     }
