@@ -1,8 +1,9 @@
 # WIP
 * Improve the current code
-* Saving Views in JSON
-* Improve the live JSONs alter
-* Implementation live JSONs sync with frontend
+* Saving Views in JSON (Axiliar module)
+* Remove batch api by UI, is more slow than drush command
+* Minimal Alter normalize for return clean data (Auxiliar module)
+* Entity to JSON taking into account the bundle
 
 # Description
 This module is designed to facilitate the storage of content in JSON files within the Drupal framework. Using this approach, we can retrieve entity data from JSON files rather than solely relying on the database. Furthermore, it enables the generation of JSON files for all entities within the website, which can be copied to another server equipped with a frontend framework like NextJS. This allows for the consumption of this data without the need for continuous requests to the Drupal backend.
@@ -48,12 +49,17 @@ Accessing JSON data can be achieved through API endpoints, or you can copy the f
 **API Endpoints:**
 
 POST: /{lang}/static-api/get-entity-alias
-
+Body params:
+    alias: This is the Entity Alias that we need get.
+Query params:
+    force(Optional): This params is for get the information from DB instead JSON files, the value does not affect the result. 
 ```json
 { "alias": "/node/4" }
 ```
 
 POST|GET: /{lang}/static-api/get-entity/{entity_type}/{id}
+Query params:
+    force(Optional): This params is for get the information from DB instead JSON files, the value does not affect the result. 
 
 Should you wish to transfer the JSON folder to a frontend framework, this module provides the necessary endpoints and library for NextJS within the 'auxiliarFiles' directory of this module. The folder structure for NextJS usage should be organized as follows:
 
