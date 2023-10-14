@@ -24,68 +24,73 @@ class SettingsForm extends ConfigFormBase {
   public function buildForm(array $form, FormStateInterface $form_state) {
     $config = $this->config('static_custom_api.settings');    
 
+    $form['base_group'] = array(
+      '#type' => 'fieldset',
+      '#title' => $this->t('Base Configuration'),
+    );
 
-    $form["directory"] = [
+    $form['base_group']["directory"] = [
       '#type' => 'textfield',
       '#title' => t('Directory'),
+      '#description' => t('Enter the directory path where JSON files will be stored.'),
       '#default_value' => "public://custom-build",
       '#required' => TRUE,
     ];
    
-    $form["content_types"] = [
+    $form['base_group']["content_types"] = [
         '#type' => 'checkboxes',
         '#title' => t('Entity Types'),
         '#options' => $this->getAllContentTypes(),
+        '#description' => t('Choose the entity types you want to include in your custom content in JSON format.'),
         '#default_value' => $config->get('content_types'),
     ];
 
-    $form['sync_front'] = array(
+    $form['front_sync_group'] = array(
+      '#type' => 'fieldset',
+      '#title' => $this->t('Front End Sincronization'),
+    );
+
+    $form['front_sync_group']['sync_front'] = array(
       '#type' => 'checkbox',
       '#title' => t('Sync with FrontEnd.'),
+      '#description' => t('Check this box to enable synchronization with the Front End.'),
       '#default_value' => $config->get('sync_front'),
     );
 
-    $form["url_front"] = [
+    $form['front_sync_group']["url_front"] = [
       '#type' => 'textfield',
       '#title' => t('End Point FrontEnd'),
+      '#description' => t('Enter the endpoint URL for the Front End synchronization.'),
       '#default_value' => $config->get('url_front'),
 
     ];
 
-    $form["password_frontend"] = [ 
+    $form['front_sync_group']["password_frontend"] = [ 
       "#type" => "textfield", 
       "#title" => t("Password Frontend"), 
+      "#description" => t('Enter the password for Front End synchronization.'),
       "#default_value" => $config->get('password_frontend'), 
     ];
 
-    $form['generate_button'] = [
+    $form['front_sync_group']['generate_button'] = [
       '#type' => 'button',
       '#value' => t('Generate Random String'),
       '#ajax' => [
         'callback' => [$this, 'generateRandomString'],
-        // Especifica el elemento del formulario que se va a actualizar.
         'wrapper' => 'random-string-wrapper',
       ],
     ];
 
-    $form['password_frontend']['#prefix'] = '<div id="random-string-wrapper">';
-    $form['password_frontend']['#suffix'] = '</div>';
-
-    
-
-
+    $form['front_sync_group']['password_frontend']['#prefix'] = '<div id="random-string-wrapper">';
+    $form['front_sync_group']['password_frontend']['#suffix'] = '</div>';
 
     return parent::buildForm($form, $form_state);
   }
 
-  // Define la función que genera el string aleatorio y lo asigna al campo de texto. 
   public function generateRandomString(array &$form, FormStateInterface $form_state) { 
-    // Genera un string aleatorio de 10 caracteres usando letras y números. 
     $random_string = $this->generate_hex_password(40); 
-    // Asigna el string aleatorio al valor del campo de texto. 
-    $form["password_frontend"]["#value"] = $random_string; 
-    // Devuelve el elemento del formulario que se ha actualizado. 
-    return $form["password_frontend"]; 
+    $form['front_sync_group']["password_frontend"]["#value"] = $random_string; 
+    return $form['front_sync_group']["password_frontend"]; 
   }
 
 
