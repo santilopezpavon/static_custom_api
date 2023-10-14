@@ -52,10 +52,50 @@ class SettingsForm extends ConfigFormBase {
 
     ];
 
+    $form["password_frontend"] = [ 
+      "#type" => "textfield", 
+      "#title" => t("Password Frontend"), 
+      "#default_value" => $config->get('password_frontend'), 
+    ];
+
+    $form['generate_button'] = [
+      '#type' => 'button',
+      '#value' => t('Generate Random String'),
+      '#ajax' => [
+        'callback' => [$this, 'generateRandomString'],
+        // Especifica el elemento del formulario que se va a actualizar.
+        'wrapper' => 'random-string-wrapper',
+      ],
+    ];
+
+    $form['password_frontend']['#prefix'] = '<div id="random-string-wrapper">';
+    $form['password_frontend']['#suffix'] = '</div>';
+
+    
+
 
 
     return parent::buildForm($form, $form_state);
   }
+
+  // Define la función que genera el string aleatorio y lo asigna al campo de texto. 
+  public function generateRandomString(array &$form, FormStateInterface $form_state) { 
+    // Genera un string aleatorio de 10 caracteres usando letras y números. 
+    $random_string = $this->generate_hex_password(40); 
+    // Asigna el string aleatorio al valor del campo de texto. 
+    $form["password_frontend"]["#value"] = $random_string; 
+    // Devuelve el elemento del formulario que se ha actualizado. 
+    return $form["password_frontend"]; 
+  }
+
+
+  private function generate_hex_password($length) {
+    $bytes = random_bytes($length);  
+    $hex_password = bin2hex($bytes);  
+    return $hex_password;
+  }
+
+
 
   public function submitForm(array &$form, FormStateInterface $form_state) {
     $config = $this->config('static_custom_api.settings');
@@ -63,6 +103,7 @@ class SettingsForm extends ConfigFormBase {
     $config->set('directory', $form_state->getValue('directory'));
     $config->set('sync_front', $form_state->getValue('sync_front'));
     $config->set('url_front', $form_state->getValue('url_front'));
+    $config->set('password_frontend', $form_state->getValue('password_frontend'));
 
     $nonAssociativeArray = [];
 
@@ -80,7 +121,7 @@ class SettingsForm extends ConfigFormBase {
 
     $config->set('content_types_array', $nonAssociativeArray);
 
-
+    
     $config->save();
 
     parent::submitForm($form, $form_state);
