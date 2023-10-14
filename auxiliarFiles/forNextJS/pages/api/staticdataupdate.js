@@ -6,10 +6,16 @@ import path from 'path';
 export default async function handler(req, res) {
   // We get the method of the request
   const method = req.method;
+  const currentKeyConfig = config.update_delete_key;
 
   // We get the name of the file that we want to delete or create
   //const fileName = req.query.fileName;
-  const { fileName } = req.body;
+  const { fileName, currentKeyRequest } = req.body;
+
+  if(currentKeyConfig != currentKeyRequest) {
+    res.status(400).send('The key is invalid');
+    return;
+  }
 
   // We check if the name of the file is valid
   if (!fileName) {

@@ -47,6 +47,13 @@ class SyncFront {
     private $errorLogLimit;
 
     /**
+     * The request password.
+     *
+     * @var string
+     */
+    private $password;
+
+    /**
      * Constructs a new SyncFront object.
      *
      * @param \GuzzleHttp\ClientInterface $http_client
@@ -60,6 +67,7 @@ class SyncFront {
         $this->end_point =  $config->get("url_front"); 
         $this->doSync = $config->get("url_front_bool"); 
         $this->base_folder = $config->get("directory"); 
+        $this->password = $config->get("password_frontend"); 
         $this->errorLogLimit = 255; // Limit for error log messages.
     }
 
@@ -79,7 +87,8 @@ class SyncFront {
         try {
             $request = $this->client->delete($this->end_point, [
                 'json' => [
-                  'fileName' => $this->processFileName($file)
+                  'fileName' => $this->processFileName($file),
+                  "currentKeyRequest" => $this->password
                 ]
             ]);
             return json_decode($request->getBody());
@@ -108,7 +117,8 @@ class SyncFront {
             $request = $this->client->post($this->end_point, [
                 'json' => [
                   'fileName' => $this->processFileName($file),
-                  "data" => $fileData
+                  "data" => $fileData,
+                  "currentKeyRequest" => $this->password
                 ]
             ]);
             return json_decode($request->getBody());
